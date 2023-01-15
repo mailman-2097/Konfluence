@@ -7,8 +7,6 @@ This tutorial provides a quick introduction into Kubernetes aka K8s and how to s
 
 ## Installing a local VM (Recommended)
 It is recommended to install cluster and cluster management tools on a local virtual machine, but this is optional.
-> You can refer to the following repo to get a working vagrant vm setup
-https://git.health.nsw.gov.au/60278807/vagrant-ubuntu22
 
 ## Installing Docker
 Installing Docker will be a pre-requisite such that you can build and manage container images as follows:
