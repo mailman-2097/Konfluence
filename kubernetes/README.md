@@ -7,3 +7,6 @@
 1. [Introduction](00-Intro.md)
 1. [Local Dev Setup](00-Dev-Setup.md)
 1. [Container Anatomy](00-Container-Anatomy.md)
+1. [Openshift Series](00-Openshift-Intro.md)
+
+
