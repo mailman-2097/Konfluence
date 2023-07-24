@@ -119,14 +119,125 @@ EOF
 
 ```
 sudo systemctl restart named
+# Validate the OpenShift API
 dig +short @192.168.1.200 api.ocp.myhybridcloud.com
 dig +short @192.168.1.200 api-int.ocp.myhybridcloud.com
+
+# Validate the application's wildcard
+dig +short @192.168.1.200 joedoe.apps.ocp.hybridmycloud.com
+dig +short @192.168.1.200 whatever.apps.ocp.hybridmycloud.com
+
 ```
 
-## DNS
+## DHCP
 
+```
 
+sudo yum install dhcp-server -y
+```
 
+```
+cat <<EOF > /etc/dhcp/dhcpd.conf
+# DHCP Server Configuration file.
+#[1]
+ddns-update-style interim;
+ignore client-updates;
+authoritative;
+allow booting;
+allow bootp;
+allow unknown-clients;
+default-lease-time 3600;
+default-lease-time 900;
+max-lease-time 7200;
+#[2]
+subnet 192.168.1.0 netmask 255.255.255.0 {
+option routers 192.168.1.254;
+option domain-name-servers 192.168.1.200;
+option ntp-servers 192.168.1.200;
+next-server 192.168.1.200; #[2.1]
+#filename "pxelinux.0";#[2.2]
+#[3]
+group {
+host bootstrap {
+hardware ethernet 50:6b:8d:aa:aa:aa;
+fixed-address 192.168.1.90;
+option host-name "bootstrap.ocp.hybridmycloud.com";
+allow booting;
+}
+host master1 {
+hardware ethernet 50:6b:8d:bb:bb:bb;
+fixed-address 192.168.1.91;
+option host-name "master1.ocp.hybridmycloud.com";
+allow booting;
+}
+host master2 {
+hardware ethernet 50:6b:8d:cc:cc:cc;
+fixed-address 192.168.1.92 ;
+option host-name "master2.ocp.hybridmycloud.com";
+allow booting;
+}
+host master3 {
+hardware ethernet 50:6b:8d:dd:dd:dd;
+fixed-address 192.168.1.93 ;
+option host-name "master3.ocp.hybridmycloud.com";
+allow booting;
+}
+host worker1 {
+hardware ethernet 50:6b:8d:11:11:11;
+fixed-address 192.168.1.101;
+option host-name "worker1.ocp.hybridmycloud.com";
+allow booting;
+}
+host worker2 {
+hardware ethernet 50:6b:8d:22:22:22;
+fixed-address 192.168.1.102;
+option host-name "worker2.ocp.hybridmycloud.com";
+allow booting;
+}
+}
+} 
+EOF
+sudo systemctl enable --now dhcpd
+sudo firewall-cmd --add-service=dhcp --permanent
+sudo firewall-cmd --reload
+```
+
+```
+[1]: Common settings to define DHCP as authoritative in that subnet and times of IP lease.
+[2]: Scope subnet definition:
+    [2.1] and [2.2]: Must be defined when using a PXE server, helpful for bare metal installations. In this lab, we are going to use VMs and, as such, that will not be used; therefore, leave it commented (using the # character at the beginning of the line).
+[3]: A group with all nodes to lease IP addresses. If you go for a three-node cluster, disregard the worker hosts.
+```
+
+> Important Note
+> After you create the VMs in your hypervisor, update dhcpd.conf accordingly with the MAC addresses you get from the network interfaces; otherwise, no IP address will be given to this subnet.
+
+## Web Server
+A web server is used to serve the OS image to install nodes, and also to provide the Ignition files (Ignition files are manifest files encoded on base64).
+
+```
+sudo yum install httpd policycoreutils-python-utils –y
+sudo sed –i 's/80/81/g' /etc/httpd/conf/httpd.conf
+sudo semanage port -a -t http_port_t -p tcp 81
+sudo firewall-cmd --add-port 81/tcp --permanent
+sudo firewall-cmd --reload
+
+sudo mkdir –p /var/www/html/images
+sudo mkdir –p /var/www/html/ignition
+sudo touch /var/www/html/images/imageFileToTest.txt
+sudo touch /var/www/html/ignition/ignitionFileToTest.txt
+sudo mkdir –p /var/www/html/images
+sudo mkdir –p /var/www/html/ignition
+sudo touch /var/www/html/images/imageFileToTest.txt
+sudo touch /var/www/html/ignition/ignitionFileToTest.txt
+sudo systemctl enable --now httpd 
+
+curl –O http://192.168.1.200:81/images/imageFileToTest.txt
+curl –O http://192.168.1.200:81/ignition/ignitionFileToTest.txt
+
+```
+
+# Load balancer
 
 # References
 
