@@ -63,11 +63,6 @@ source ~/.bash_profile
 
 npm install -g aws-azure-login
 
-
-Tenant Id: 05a0e69a-418a-47c1-9c25-9387261bf991
-App Id URI: https://signin.aws.amazon.com/saml
-userid: nishad.ks@det.nsw.edu.au
-
 dnf install -y \
 alsa-lib.x86_64 \
 atk.x86_64 \
