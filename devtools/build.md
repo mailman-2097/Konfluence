@@ -42,6 +42,7 @@ Modify init.lua.. which is like you index.html
 ```
 
 # LunarVim
+```
 sudo apt install python3-pip -y
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -49,7 +50,7 @@ LV_BRANCH='release-1.3/neovim-0.9' bash <(curl -s https://raw.githubusercontent.
 
 ```
 
-## aws-azure-login
+## AWS Azure SSO Tool
 ```bash
 <!-- https://samltool.io/ -->
 
